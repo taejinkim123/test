@@ -4,8 +4,8 @@ import pandas as pd
 
 # 샘플 데이터 생성
 payment_data = pd.DataFrame({
-    'Payment Method': ['카드', '계좌이체', '휴대폰 결제', '간편결제', '기타'],
-    'Usage (%)': [40, 25, 20, 10, 5]
+    'Payment Method': ['체크카드', '신용카드', '계좌이체', '휴대폰 결제', '간편결제', '기타'],
+    'Usage (%)': [20, 20, 25, 20, 10, 5]
 })
 
 review_data = pd.DataFrame({
