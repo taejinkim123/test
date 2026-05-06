@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계산기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .calculator {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .display {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .display .expression {
+            color: #8892b0;
+            font-size: 16px;
+            min-height: 24px;
+            word-break: break-all;
+        }
+
+        .display .result {
+            color: #fff;
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            font-size: 22px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-number {
+            background: #2d3748;
+            color: #fff;
+        }
+
+        .btn-number:hover {
+            background: #3d4a5c;
+        }
+
+        .btn-operator {
+            background: #4a5568;
+            color: #ffd93d;
+        }
+
+        .btn-operator:hover {
+            background: #5a6578;
+        }
+
+        .btn-clear {
+            background: #e53e3e;
+            color: #fff;
+        }
+
+        .btn-clear:hover {
+            background: #f56565;
+        }
+
+        .btn-equals {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            grid-column: span 2;
+        }
+
+        .btn-equals:hover {
+            opacity: 0.9;
+        }
+
+        .history-panel {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 25px;
+            width: 320px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .history-header h2 {
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .clear-history {
+            background: #e53e3e;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .clear-history:hover {
+            background: #f56565;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: #16213e;
+            border-radius: 3px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 3px;
+        }
+
+        .history-item {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            background: #1e2a47;
+            transform: translateX(5px);
+        }
+
+        .history-item .expression {
+            color: #8892b0;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .history-item .result {
+            color: #ffd93d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .history-item .time {
+            color: #4a5568;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .empty-history {
+            color: #4a5568;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .history-panel {
+                width: 100%;
+                max-width: 320px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calculator">
+            <div class="display">
+                <div class="expression" id="expression"></div>
+                <div class="result" id="result">0</div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-clear" onclick="clearAll()">C</button>
+                <button class="btn btn-operator" onclick="backspace()">⌫</button>
+                <button class="btn btn-operator" onclick="appendOperator('%')">%</button>
+                <button class="btn btn-operator" onclick="appendOperator('/')">÷</button>
+
+                <button class="btn btn-number" onclick="appendNumber('7')">7</button>
+                <button class="btn btn-number" onclick="appendNumber('8')">8</button>
+                <button class="btn btn-number" onclick="appendNumber('9')">9</button>
+                <button class="btn btn-operator" onclick="appendOperator('*')">×</button>
+
+                <button class="btn btn-number" onclick="appendNumber('4')">4</button>
+                <button class="btn btn-number" onclick="appendNumber('5')">5</button>
+                <button class="btn btn-number" onclick="appendNumber('6')">6</button>
+                <button class="btn btn-operator" onclick="appendOperator('-')">−</button>
+
+                <button class="btn btn-number" onclick="appendNumber('1')">1</button>
+                <button class="btn btn-number" onclick="appendNumber('2')">2</button>
+                <button class="btn btn-number" onclick="appendNumber('3')">3</button>
+                <button class="btn btn-operator" onclick="appendOperator('+')">+</button>
+
+                <button class="btn btn-number" onclick="appendNumber('0')">0</button>
+                <button class="btn btn-number" onclick="appendNumber('.')">.</button>
+                <button class="btn btn-equals" onclick="calculate()">=</button>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">
+                <h2>계산 기록</h2>
+                <button class="clear-history" onclick="clearHistory()">전체 삭제</button>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="empty-history">계산 기록이 없습니다</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentExpression = '';
+        let lastResult = '0';
+
+        function updateDisplay() {
+            document.getElementById('expression').textContent = formatExpression(currentExpression);
+            document.getElementById('result').textContent = lastResult;
+        }
+
+        function formatExpression(expr) {
+            return expr
+                .replace(/\*/g, ' × ')
+                .replace(/\//g, ' ÷ ')
+                .replace(/\+/g, ' + ')
+                .replace(/-/g, ' − ')
+                .replace(/%/g, ' % ');
+        }
+
+        function appendNumber(num) {
+            currentExpression += num;
+            try {
+                lastResult = eval(currentExpression).toString();
+            } catch (e) {
+                // 계산 불가능한 상태
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (currentExpression === '' && lastResult !== '0') {
+                currentExpression = lastResult;
+            }
+            if (currentExpression !== '') {
+                const lastChar = currentExpression.slice(-1);
+                if (['+', '-', '*', '/', '%'].includes(lastChar)) {
+                    currentExpression = currentExpression.slice(0, -1);
+                }
+                currentExpression += op;
+                updateDisplay();
+            }
+        }
+
+        function clearAll() {
+            currentExpression = '';
+            lastResult = '0';
+            updateDisplay();
+        }
+
+        function backspace() {
+            currentExpression = currentExpression.slice(0, -1);
+            if (currentExpression === '') {
+                lastResult = '0';
+            } else {
+                try {
+                    lastResult = eval(currentExpression).toString();
+                } catch (e) {
+                    // 계산 불가능한 상태
+                }
+            }
+            updateDisplay();
+        }
+
+        function calculate() {
+            if (currentExpression === '') return;
+
+            try {
+                const result = eval(currentExpression);
+                if (isNaN(result) || !isFinite(result)) {
+                    lastResult = 'Error';
+                } else {
+                    const displayExpression = currentExpression;
+                    lastResult = result.toString();
+
+                    saveToHistory(displayExpression, lastResult);
+
+                    currentExpression = '';
+                }
+            } catch (e) {
+                lastResult = 'Error';
+            }
+            updateDisplay();
+        }
+
+        function saveToHistory(expression, result) {
+            const history = getHistory();
+            const item = {
+                expression: expression,
+                result: result,
+                timestamp: new Date().toISOString()
+            };
+            history.unshift(item);
+
+            if (history.length > 50) {
+                history.pop();
+            }
+
+            localStorage.setItem('calculatorHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function getHistory() {
+            const stored = localStorage.getItem('calculatorHistory');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function clearHistory() {
+            localStorage.removeItem('calculatorHistory');
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = getHistory();
+            const container = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                container.innerHTML = '<div class="empty-history">계산 기록이 없습니다</div>';
+                return;
+            }
+
+            container.innerHTML = history.map((item, index) => {
+                const date = new Date(item.timestamp);
+                const timeStr = date.toLocaleString('ko-KR', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="history-item" onclick="useHistoryResult('${item.result}')">
+                        <div class="expression">${formatExpression(item.expression)}</div>
+                        <div class="result">= ${item.result}</div>
+                        <div class="time">${timeStr}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function useHistoryResult(result) {
+            currentExpression = result;
+            lastResult = result;
+            updateDisplay();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                appendNumber(e.key);
+            } else if (e.key === '.') {
+                appendNumber('.');
+            } else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') {
+                appendOperator(e.key);
+            } else if (e.key === '%') {
+                appendOperator('%');
+            } else if (e.key === 'Enter' || e.key === '=') {
+                e.preventDefault();
+                calculate();
+            } else if (e.key === 'Backspace') {
+                backspace();
+            } else if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') {
+                clearAll();
+            }
+        });
+
+        renderHistory();
+    </script>
+</body>
+</html>
